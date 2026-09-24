@@ -1,0 +1,16 @@
+Metadata-Version: 2.4
+Name: mongodb-agent-engine-demo
+Version: 0.1.0
+Summary: Long-running BFSI accrual-variance agent demo on MongoDB Agent Engine + Atlas + S3
+Requires-Python: >=3.10
+Requires-Dist: pymongo<5,>=4.7
+Requires-Dist: boto3<2,>=1.34
+Requires-Dist: python-dotenv<2,>=1.0
+Provides-Extra: ui
+Requires-Dist: streamlit<2,>=1.32; extra == "ui"
+Provides-Extra: voyage
+Requires-Dist: voyageai>=0.2; extra == "voyage"
+Provides-Extra: openai
+Requires-Dist: openai>=1.30; extra == "openai"
+Provides-Extra: test
+Requires-Dist: pytest<9,>=8; extra == "test"

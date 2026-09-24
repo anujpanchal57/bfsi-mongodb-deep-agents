@@ -1,0 +1,6 @@
+# Local development settings for `agentengine dev up`. Per-developer; never
+# read by build/deploy.
+services:
+  mongodb:
+    local: false   # use a real Atlas cluster (search indexes need it);
+                   # MONGODB_URI comes from .env

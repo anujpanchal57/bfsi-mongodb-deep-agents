@@ -1,0 +1,18 @@
+Metadata-Version: 2.4
+Name: accrual-variance-review
+Version: 0.1.0
+Summary: Long-running BFSI accrual-variance agent demo on Atlas Agent Engine + Deep Agents VFS + S3
+Requires-Python: >=3.11
+Requires-Dist: pymongo<5,>=4.7
+Requires-Dist: boto3<2,>=1.34
+Requires-Dist: python-dotenv<2,>=1.0
+Provides-Extra: platform
+Requires-Dist: agent-engine-sdk-langgraph; extra == "platform"
+Requires-Dist: deepagents; extra == "platform"
+Requires-Dist: langchain-mongodb-deepagents-vfs[bedrock]; extra == "platform"
+Requires-Dist: langchain-openai>=0.3; extra == "platform"
+Requires-Dist: langchain-anthropic>=0.3; extra == "platform"
+Provides-Extra: ui
+Requires-Dist: streamlit<2,>=1.32; extra == "ui"
+Provides-Extra: test
+Requires-Dist: pytest<9,>=8; extra == "test"

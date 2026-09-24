@@ -1,0 +1,100 @@
+{
+  "dataset_version": "v1",
+  "description": "Synthetic BFSI month-end accrual variance review. All names, IDs, and amounts are fictional; no customer or production data.",
+  "workspace": {
+    "workspace_id": "accrual_review_demo_2026_06",
+    "process": "accrual_review",
+    "period": "2026-06",
+    "entity": "demo_finance_india",
+    "owner": "finance-reviewer"
+  },
+  "scenario": {
+    "entity": "demo_finance_india",
+    "vendor_id": "VEN-2048",
+    "vendor_name": "Asterion Cloud Services India Pvt Ltd",
+    "contract_id": "CON-7781",
+    "cost_center": "CC-410",
+    "gl_account": "GL-6110",
+    "current_period": "2026-06",
+    "prior_period": "2026-05",
+    "currency": "INR",
+    "booked_accrual": 1240000,
+    "expected_accrual": 1275000,
+    "variance": 35000,
+    "prior_period_accrual": 1255000,
+    "prior_period_variance": 0,
+    "monthly_rate": 1275000,
+    "rate_effective_date": "2026-04-01",
+    "service_category": "managed_cloud_services",
+    "contract_start": "2026-04-01",
+    "contract_end": "2027-03-31",
+    "approval_status": "pending_human_review",
+    "missing_artifact": "invoice_support_2026-06.pdf",
+    "preparer": "demo-preparer",
+    "reviewer": "demo-reviewer"
+  },
+  "artifacts": [
+    {
+      "logical_id": "accrual_extract_current",
+      "s3_key": "source/2026-06/accrual_extract_current.csv",
+      "filename": "accrual_extract_current.csv",
+      "format": "csv",
+      "artifact_type": "accrual_extract",
+      "period": "2026-06"
+    },
+    {
+      "logical_id": "accrual_extract_prior",
+      "s3_key": "source/2026-05/accrual_extract_prior.csv",
+      "filename": "accrual_extract_prior.csv",
+      "format": "csv",
+      "artifact_type": "accrual_extract",
+      "period": "2026-05"
+    },
+    {
+      "logical_id": "vendor_contract",
+      "s3_key": "source/2026-06/vendor_contract_CON-7781.md",
+      "filename": "vendor_contract_CON-7781.md",
+      "format": "md",
+      "artifact_type": "contract",
+      "period": "2026-06"
+    },
+    {
+      "logical_id": "rate_schedule",
+      "s3_key": "source/2026-06/rate_schedule_CON-7781.csv",
+      "filename": "rate_schedule_CON-7781.csv",
+      "format": "csv",
+      "artifact_type": "rate_schedule",
+      "period": "2026-06"
+    },
+    {
+      "logical_id": "reconciliation_workpaper",
+      "s3_key": "source/2026-06/reconciliation_workpaper_CON-7781.md",
+      "filename": "reconciliation_workpaper_CON-7781.md",
+      "format": "md",
+      "artifact_type": "workpaper",
+      "period": "2026-06"
+    },
+    {
+      "logical_id": "exception_log",
+      "s3_key": "source/2026-06/exception_log.json",
+      "filename": "exception_log.json",
+      "format": "json",
+      "artifact_type": "exception_log",
+      "period": "2026-06"
+    },
+    {
+      "logical_id": "approval_record",
+      "s3_key": "source/2026-06/approval_record.json",
+      "filename": "approval_record.json",
+      "format": "json",
+      "artifact_type": "approval_record",
+      "period": "2026-06"
+    }
+  ],
+  "evidence_index_key": "manifests/v1/evidence_index.json",
+  "expected_evidence_gaps": ["invoice_support"],
+  "retrieval_targets": {
+    "exact_match": "CON-7781",
+    "semantic": "support for the June cloud-services accrual variance"
+  }
+}

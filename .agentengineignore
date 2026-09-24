@@ -1,0 +1,12 @@
+# Controls which files `agentengine build` packs into the source archive.
+# (.env / .env.* and .git are always excluded by the platform.)
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+data/generated/
+docs/
+/tmp/
+tests/
+*.md
+!README.md

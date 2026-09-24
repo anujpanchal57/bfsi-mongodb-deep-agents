@@ -1,0 +1,33 @@
+name: accrual-variance-review
+entrypoint: src.demo_agent.main:app
+framework: langgraph
+description: Month-end accrual variance review with durable, evidence-driven
+  orchestration over an S3 + Atlas workspace. Human-in-the-loop BFSI demo.
+version: 0.1.0
+
+features:
+  deep_agent: true          # required for app.deep_agent()
+  durable_workflow: true    # OE-owned durable sessions
+  memory: false
+
+sandboxes:
+  agent:
+    network:
+      egress_mode: allow_list
+      egress:
+        - fqdn: s3.ap-south-1.amazonaws.com   # S3 object I/O
+        - fqdn: api.openai.com                # LLM provider (adjust per LLM_PROVIDER)
+        - fqdn: bedrock-runtime.ap-south-1.amazonaws.com  # default embeddings (Titan v2)
+    secrets: ["*"]
+    tools: ["*"]            # demo tools are all agent-side
+  tool:
+    secrets: ["*"]
+    tools: []
+
+required_secrets:
+  aer:
+    - MONGODB_URI
+    - LLM_API_KEY
+  tools:
+    invoke_llm:
+      - LLM_API_KEY
