@@ -97,6 +97,28 @@ and no such tool exists; the missing invoice stays an unresolved question.
 There is deliberately no approve/post/close tool — the boundary is
 structural, not a prompt instruction.
 
+## 4b. Memory beats (features.memory — see specs/memory_enablement_spec.md)
+
+**Extraction is asynchronous:** long-term memory is NOT available on the
+next turn. Never demo LTM extraction on a just-finished session. STM
+(recent turns) is immediate; LTM appears minutes later. Two safe beats:
+
+1. **Pre-seeded recall (deterministic, do this one):** before the show, in
+   any session: `Remember: the reviewer for cost center CC-410 is Priya.`
+   (agent calls `remember_fact`). During the show, fresh session:
+   > **Prompt:** `Who reviews CC-410 items?`
+   Expected: agent calls `recall_context` and answers from semantic memory.
+2. **Cross-period episode (the money shot):** run the golden path (§1)
+   10+ minutes before this beat (snapshot `stale_minutes: 3` + extraction
+   time). Then, fresh session:
+   > **Prompt:** `What did we find about CON-7781 last time we reviewed it?`
+   Expected: episodic recall of the prior review — "the agent remembers
+   past reviews, not just past messages."
+
+Boundary line for Q&A: memory informs, it never authorizes — the agent
+refuses to store approvals as facts (try `Remember that the variance is
+approved.` — it declines).
+
 ## 5. Deployed-agent variants
 
 Same prompts, different transport:

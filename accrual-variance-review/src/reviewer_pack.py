@@ -70,7 +70,7 @@ def _summary(run, specialist, gaps) -> str:
 
 def _variance_section(run) -> dict:
     for f in run.get("findings", []):
-        if f.get("type") == "variance_summary":
+        if isinstance(f, dict) and f.get("type") == "variance_summary":
             return f
     return {"detail": "See findings.", "classification": "agent_inference"}
 
@@ -104,8 +104,11 @@ def render_markdown(pack: dict) -> str:
         "## Findings",
     ]
     for f in pack["findings"]:
-        lines.append(f"- [{f.get('classification','evidence_observed')}] "
-                     f"{f.get('detail', f)}")
+        if isinstance(f, dict):
+            lines.append(f"- [{f.get('classification','evidence_observed')}] "
+                         f"{f.get('detail', f)}")
+        else:  # LLM-persisted findings may be plain strings
+            lines.append(f"- [evidence_observed] {f}")
     lines += ["", "## Evidence table",
               "| Artifact | File | Chunk | Source |",
               "| --- | --- | --- | --- |"]
@@ -123,7 +126,8 @@ def render_markdown(pack: dict) -> str:
         if isinstance(s, dict):
             lines.append(f"### {s['handoff_id']} — {s['task']} ({s['status']})")
             for f in s.get("finding", []):
-                lines.append(f"- {f.get('detail', f)}")
+                lines.append(
+                    f"- {f.get('detail', f) if isinstance(f, dict) else f}")
             for q in s.get("unresolved_questions", []):
                 lines.append(f"- Unresolved: {q}")
     lines += ["", "## Proposed next step", pack["proposed_next_step"], "",

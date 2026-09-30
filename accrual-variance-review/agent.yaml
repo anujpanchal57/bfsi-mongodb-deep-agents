@@ -10,7 +10,10 @@ agent_card:
     - durable workflow state and specialist handoffs
     - reviewer pack generation with a hard human-decision boundary
 features:
-  deep_agent: true # required for app.deep_agent()
+  deep_agent: true          # required for app.deep_agent()
+  memory: true              # memory server (project service); config in
+                            # project-config.yaml at the project root.
+                            # Requires VOYAGE_API_KEY in .env / project secrets.
   # Durability is implicit via app.checkpointer() (MongoDBSaver) — there is no
   # durable_workflow flag in the current schema.
 sandboxes:

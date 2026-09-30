@@ -68,3 +68,29 @@ def test_specialist_output_included(pack):
     assert pack["specialist_output"][0]["handoff_id"] == "hof-test1"
     assert pack["assumptions_and_uncertainty"] == [
         "Rate schedule applies for full period."]
+
+
+def test_render_tolerates_string_findings(seeded):
+    """LLM-persisted findings may be plain strings (observed live: the
+    specialist returned finding as list[str) — render must not crash."""
+    from src.reviewer_pack import render_markdown
+    repo, ws = seeded["repo"], seeded["workspace_id"]
+    run = new_run("run-str", ws, "s-str", "review the variance")
+    run.update({"state": "specialist_completed",
+                "findings": ["Booked 1,240,000 vs expected 1,275,000 INR."],
+                "handoff_ids": ["hof-str"]})
+    repo.upsert("runs", run)
+    h = new_handoff("hof-str", ws, "run-str", "analyze variance",
+                    {"artifact_ids": [], "period": "2026-06",
+                     "entity": "demo_finance_india"})
+    h["status"] = "completed"
+    h["result"] = {"finding": ["Variance INR 35,000 is new."],
+                   "evidence_references": [],
+                   "unresolved_questions": ["Invoice support missing."],
+                   "recommended_next_step": "Request invoice.",
+                   "assumptions": []}
+    repo.upsert("handoffs", h)
+    from src.reviewer_pack import build_reviewer_pack
+    pack = build_reviewer_pack(repo, ws, "run-str")
+    assert "Variance INR 35,000 is new." in pack["markdown"]
+    assert pack["human_decision_required"]["required"] is True

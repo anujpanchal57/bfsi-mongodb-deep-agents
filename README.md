@@ -3,7 +3,9 @@
 Conference demo (MongoDB.local Mumbai): a durable, evidence-driven agent
 workflow for month-end accrual variance review.
 
-- **Atlas Agent Engine** runs the agent (`agent.yaml` → `src.demo_agent.main:app`;
+- **Atlas Agent Engine** runs the agent (`accrual-variance-review/agent.yaml`
+  → `src.demo_agent.main:app`; two-level layout with `project-config.yaml`
+  at the repo root for the memory service;
   DeepAgents orchestrator + variance-analysis subagent via `task()` dispatch;
   durable sessions via the platform MongoDB checkpointer).
 - **LangChain Deep Agents VFS** (`langchain-mongodb-deepagents-vfs`) is the
@@ -20,6 +22,10 @@ workflow for month-end accrual variance review.
   `amazon.titan-embed-text-v2:0` @ 1024 dims via the boto3 credential chain.
 - **Human-in-the-loop:** the agent gathers evidence and proposes; it never
   approves, posts, or closes. No such tool exists.
+- **Memory:** cross-session recall via the platform memory service
+  (`features.memory: true`; project config in `project-config.yaml`) —
+  episodic (past reviews), semantic (durable facts via `remember_fact`),
+  taxonomic (domain glossary). Memory informs; it never authorizes.
 
 A clean checkout plus credentials generates the complete S3 dataset — no
 manually prepared source artifacts are required.
@@ -70,7 +76,7 @@ matches the demo workspace, VFS chunks whose `source_path` is under the demo
 6. Reviewer pack tab: evidence table, gaps, assumptions, and the HUMAN
    DECISION REQUIRED banner. There is no approve/post/close button.
 
-CLI equivalent: `make smoke`. Presenter prompt runbook: `specs/demo_prompts.md`.
+CLI equivalent: `make smoke`. Presenter prompt runbook: `docs/demo_prompts.md`.
 
 ## Seeded scenario (all synthetic)
 

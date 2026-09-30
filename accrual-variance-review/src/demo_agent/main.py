@@ -30,6 +30,7 @@ from agent_engine_sdk_langgraph import App
 
 from src.demo_agent.backend import create_backend
 from src.demo_agent.llm import build_llm
+from src.demo_agent.memory_tools import register_memory
 from src.demo_agent.prompts import ORCHESTRATOR_PROMPT
 from src.demo_agent.subagents import VARIANCE_SPECIALIST
 from src.demo_agent.tools import register
@@ -42,6 +43,7 @@ load_dotenv()
 app = App(app_name="accrual-variance-review")
 
 register(app)
+register_memory(app)
 
 
 @app.entrypoint

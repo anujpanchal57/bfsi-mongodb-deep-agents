@@ -4,7 +4,9 @@
 
 | Platform concept | This repo |
 | --- | --- |
-| Agent manifest | `agent.yaml` (repo root) — `entrypoint: src.demo_agent.main:app`, `features.deep_agent: true` |
+| Project config | `project-config.yaml` (repo root) — `memory:` block for the project-scoped memory server |
+| Agent workspace | `accrual-variance-review/` — all `agentengine` agent commands run from here |
+| Agent manifest | `accrual-variance-review/agent.yaml` — `entrypoint: src.demo_agent.main:app`, `features.deep_agent: true`, `features.memory: true` |
 | Local dev settings | `dev.yaml` (external Atlas: `services.mongodb.local: false`, so `MONGODB_URI` in `.env` is required) |
 | Entrypoint object | `src/demo_agent/main.py` → `app = App(app_name="accrual-variance-review")`; `app.run()` at module bottom |
 | Graph factory | `@app.entrypoint build_agent()` → `app.deep_agent(llm, tools, subagents, system_prompt, backend=MongoFilesystemBackend(...))` |
@@ -45,18 +47,34 @@
 ```bash
 make install                              # uv sync --extra ui --extra test
 agentengine init                          # register workspace; writes .agentengine/state.json
+                                          # (run from accrual-variance-review/; make targets cd there)
 make atlas-setup                          # service account -> cluster, IP access,
                                           # DB user, MONGODB_URI platform secret
 agentengine secret set AWS_ACCESS_KEY_ID      # Bedrock LLM + embeddings
 agentengine secret set AWS_SECRET_ACCESS_KEY
+# memory (features.memory: true): project-scope secrets — Voyage key from
+# `agentengine atlas voyage-api-key list`; LLM_API_KEY must be a REAL
+# Anthropic key (memory extraction; Bedrock is not a supported extraction
+# provider — see specs/memory_enablement_spec.md §2.3)
+agentengine secret set VOYAGE_API_KEY --project-scope
+agentengine secret set LLM_API_KEY --project-scope
+make memory-configure                     # upload memory: block from project-config.yaml
 agentengine atlas link                    # grant sandboxes network access to Atlas
 make validate-agent                       # agentengine agent validate --strict
 make seed                                 # S3 upload/verify -> backend sync
 make dev                                  # agentengine dev up; note the printed ui URL
 make smoke                                # end-to-end against the local stack
-make deploy-auto                          # build + deploy in one step
+make deploy-auto                          # build + deploy in one step (provisions
+                                          # the memory server on first memory deploy)
                                           # (or: make deploy for the two-step path)
 ```
+
+Memory config changes after deploy need no redeploy: `make memory-configure
+&& make memory-apply`; check with `make memory-status`. Note: the docs flag
+`agentengine memory configure` for future removal in favor of UI-based
+management — re-check at rehearsal. Cluster tier: Atlas Flex minimum, M10+
+recommended; a deploy stalled at `Memory: waiting` means the cluster can't
+create the required Search/Vector indexes.
 
 Record after first successful deploy:
 `AGENTENGINE CLI VERSION TESTED: <fill in>` ·

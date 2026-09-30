@@ -1,7 +1,20 @@
 # Spec: Enable Atlas Agent Engine memory for accrual-variance-review
 
-Status: proposal. Based on the public docs (Add Memory to Your Agent, Agent
-Memory, Memory Extraction), fetched 2026-09-30. Memory is configured at the
+Status: **implemented 2026-09-30.** Verified locally: two-level layout in
+place, `memory-server` starts with `dev up`, `remember_fact` writes and the
+approval-refusal holds live. **Pending (user actions):** `VOYAGE_API_KEY`
+in `.env` (retrieval via `agentengine atlas voyage-api-key list` is blocked
+by the Atlas org IP access list — allowlist the current IP or copy the key
+from Atlas UI → AI Model APIs; without it semantic recall has no vector
+search and returns empty); a real Anthropic `LLM_API_KEY` for extraction;
+and the deployed path (`memory configure` → `deploy` → `memory status`).
+Two implementation notes beyond the spec: (1) memory calls require a
+`user_id` on the invoke request (body field) — the memory beats in
+docs/demo_prompts.md need it; (2) `remember_fact` hard-refuses
+approval-shaped content (regex guard), not just a prompt instruction.
+
+Based on the public docs (Add Memory to Your Agent, Agent Memory, Memory
+Extraction), fetched 2026-09-30. Memory is configured at the
 **project** level (`project-config.yaml`) and enabled per agent via
 `features.memory: true` in `agent.yaml`.
 
@@ -199,7 +212,7 @@ each term with `save_taxonomic(domain="accrual_accounting", ...)`. Value:
 the agent answers "what is an accrual variance?" consistently, live.
 Optional — defer if time is short.
 
-## 5. Demo-flow changes (`specs/demo_prompts.md` additions)
+## 5. Demo-flow changes (`docs/demo_prompts.md` additions)
 
 **Extraction is asynchronous** — extracted memories appear "shortly after"
 a session, not on the next turn. Plan beats accordingly; STM is immediate,
@@ -242,7 +255,7 @@ LTM is not. Two safe sequences:
   is recalled in session B; a past review is recalled episodically.
 - The reviewer pack flow and the human-decision boundary are unchanged
   (offline tests + one full smoke).
-- `specs/demo_prompts.md` gains the §5 memory beats; README bullet added
+- `docs/demo_prompts.md` gains the §5 memory beats; README bullet added
   ("Memory: cross-session episodic/semantic/taxonomic recall via the
   platform memory service").
 

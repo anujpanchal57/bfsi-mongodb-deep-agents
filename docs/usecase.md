@@ -227,7 +227,7 @@ regulated environment — and that is what the platform provides.
 
 ## 7. Where to go next
 
-- Run it: `README.md` (quick start) → `specs/demo_prompts.md` (presenter
+- Run it: `README.md` (quick start) → `docs/demo_prompts.md` (presenter
   runbook with the exact prompts and what to show)
 - Deploy it: `deploy/README.md`
 - Design decisions: `specs/mongodb_agent_engine_demo_spec.md`,
