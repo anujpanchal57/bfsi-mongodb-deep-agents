@@ -1,5 +1,12 @@
 # Alignment spec: adopt LangChain Deep Agents VFS + Atlas Agent Engine SDK
 
+> **Superseded 2026-09-29** by `agent_engine_latest_docs_spec.md` (public-docs
+> diff). Two items here are now known-stale: `features.durable_workflow` is
+> not in the public agent.yaml schema (durability is implicit via
+> `app.checkpointer()`), and the public docs claim `App.deep_agent()` rejects
+> a custom `backend=` — the shipped SDK 0.11.6 still accepts it (see the new
+> spec §1 for the doc/SDK mismatch and fallback plan).
+
 Status: proposal. Supersedes the home-grown layers of the current demo where
 noted. Source artifacts verified 2026-09-24:
 

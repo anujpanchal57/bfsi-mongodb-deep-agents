@@ -10,9 +10,9 @@ from __future__ import annotations
 from src.config import Settings, load_settings
 
 SDK_HINT = (
-    "Install the platform extras first: pip install -e \".[platform]\" "
-    "(agent-engine-sdk-langgraph currently ships via the private index or "
-    "wheels/ — see deploy/README.md)")
+    "Platform dependencies are missing. Install with `uv sync` (SDK packages "
+    "are on public PyPI: agent-engine-sdk-langgraph, agent-engine-runner-shared, "
+    "langchain-mongodb-deepagents-vfs).")
 
 
 def create_backend(settings: Settings | None = None):

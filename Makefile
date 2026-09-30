@@ -1,10 +1,7 @@
-.PHONY: install install-platform test seed validate reset smoke diagnose ui validate-agent dev deploy
+.PHONY: install test seed validate reset smoke diagnose ui validate-agent dev deploy deploy-auto atlas-setup
 
 install:
-	pip install -e ".[ui,test]"
-
-install-platform:
-	pip install -e ".[platform]"
+	uv sync --extra ui --extra test
 
 test:
 	pytest -q
@@ -27,12 +24,18 @@ diagnose:
 ui:
 	streamlit run src/ui/app.py
 
-# --- platform (agentengine CLI) ---
+# --- platform (agentengine CLI; one-time: download CLI, agentengine auth login) ---
 validate-agent:
-	agentengine agent validate
+	agentengine agent validate --strict
+
+atlas-setup:
+	agentengine atlas setup
 
 dev:
 	agentengine dev up
 
 deploy:
 	agentengine build && agentengine deploy
+
+deploy-auto:
+	agentengine deploy --auto

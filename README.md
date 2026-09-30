@@ -4,13 +4,18 @@ Conference demo (MongoDB.local Mumbai): a durable, evidence-driven agent
 workflow for month-end accrual variance review.
 
 - **Atlas Agent Engine** runs the agent (`agent.yaml` → `src.demo_agent.main:app`;
-  DeepAgents orchestrator + variance-analysis subagent via `task()` dispatch).
+  DeepAgents orchestrator + variance-analysis subagent via `task()` dispatch;
+  durable sessions via the platform MongoDB checkpointer).
 - **LangChain Deep Agents VFS** (`langchain-mongodb-deepagents-vfs`) is the
   workspace backend: `grep`/`glob`/`ls` run as Atlas `$rankFusion` hybrid
   search; `read`/`write` hit S3, the source of truth for files.
 - **AWS S3** retains raw source files; **MongoDB Atlas** stores searchable
   chunks/embeddings (VFS-owned) and business state (workspaces, runs,
   handoffs, reviewer packs — ours).
+- **LLM:** AWS Bedrock (Claude Sonnet 4.5 via the Converse API, cross-region
+  inference profile `us.anthropic.claude-sonnet-4-5-20250929-v1:0`) — the same
+  boto3 credential chain as the embeddings; no third-party LLM API key.
+  Fallback providers: `LLM_PROVIDER=anthropic|openai` + `LLM_API_KEY`.
 - **Embeddings:** the VFS package default — AWS Bedrock
   `amazon.titan-embed-text-v2:0` @ 1024 dims via the boto3 credential chain.
 - **Human-in-the-loop:** the agent gathers evidence and proposes; it never
@@ -22,9 +27,8 @@ manually prepared source artifacts are required.
 ## Quick start
 
 ```bash
-pip install -e ".[ui,test]"            # offline tooling + tests
-pip install -e ".[platform]"           # SDK + deepagents + VFS backend
-cp .env.example .env                   # fill in MONGODB_URI, S3_BUCKET, LLM_*
+make install                           # uv sync (SDK + deepagents + VFS backend)
+cp .env.example .env                   # fill in MONGODB_URI, S3_BUCKET, AWS creds
 
 make test                              # offline unit tests (no Atlas/S3/Bedrock)
 make seed                              # generate -> upload/verify S3 -> register
@@ -35,10 +39,14 @@ make ui                                # Streamlit demo UI (needs AGENT_ENGINE_U
 make smoke                             # CLI smoke against the running agent
 make reset                             # delete ONLY the demo namespace
 
-# platform lifecycle (agentengine CLI)
-make validate-agent                    # agentengine agent validate
-make dev                               # agentengine dev up (local OE+AER+Tool Pod)
-make deploy                            # agentengine build && agentengine deploy
+# platform lifecycle (agentengine CLI — download page, then `agentengine auth login`)
+agentengine init                       # register workspace (.agentengine/state.json)
+make atlas-setup                       # service account -> cluster + MONGODB_URI secret
+agentengine secret set LLM_API_KEY
+make validate-agent                    # agentengine agent validate --strict
+make dev                               # agentengine dev up (local stack, hot reload)
+make deploy-auto                       # build + deploy in one step
+                                       # (or: make deploy = build && deploy)
 ```
 
 **Reset boundary:** `reset` deletes only business docs whose `workspace_id`
@@ -62,7 +70,7 @@ matches the demo workspace, VFS chunks whose `source_path` is under the demo
 6. Reviewer pack tab: evidence table, gaps, assumptions, and the HUMAN
    DECISION REQUIRED banner. There is no approve/post/close button.
 
-CLI equivalent: `make smoke`.
+CLI equivalent: `make smoke`. Presenter prompt runbook: `specs/demo_prompts.md`.
 
 ## Seeded scenario (all synthetic)
 
@@ -86,7 +94,7 @@ offline tests.
 | --- | --- |
 | Agent Engine unavailable | `agentengine dev up` locally against the same Atlas + S3 (labeled local fallback) |
 | Search not ready | Re-run `make seed` (backend sync is idempotent via ETags); check `make diagnose` output |
-| Bedrock throttled/unavailable | Backend falls back to full-text-only grep; narrate as such |
+| Bedrock throttled/unavailable | LLM: switch to `LLM_PROVIDER=openai` + `LLM_API_KEY` (and uncomment the `api.openai.com` egress line if deployed). Embeddings: backend falls back to full-text-only grep; narrate as such |
 | Model latency high | Demo narrative continues from durable state + reviewer pack |
 | UI fails | `make smoke` prints the full flow incl. the reviewer pack |
 | No external services at all | `make test` exercises generation, hashing, consistency, reset isolation, tools, and the reviewer pack offline |

@@ -4,22 +4,23 @@ version = "0.1.0"
 description = "Long-running BFSI accrual-variance agent demo on Atlas Agent Engine + Deep Agents VFS + S3"
 requires-python = ">=3.11"
 dependencies = [
+    # Platform contract: the Atlas Agent Engine requires both runner-shared and
+    # the LangGraph SDK as plain dependencies (managed builds run `uv sync`;
+    # extras are not synced). Docs pin deepagents==0.5.3, but the VFS backend
+    # requires >=0.6.0; the SDK only imports deepagents lazily, so follow the
+    # VFS constraint.
+    "agent-engine-runner-shared",
+    "agent-engine-sdk-langgraph",
+    "deepagents>=0.6.0,<1",
+    "langchain-mongodb-deepagents-vfs[bedrock]",
+    "langchain-openai>=0.3",
+    "langchain-anthropic>=0.3",
     "pymongo>=4.7,<5",
     "boto3>=1.34,<2",
     "python-dotenv>=1.0,<2",
 ]
 
 [project.optional-dependencies]
-# Platform path (agentengine dev up / build / deploy). agent-engine-sdk-langgraph
-# is published from a private index until its first public release — install via
-# the private index or a vendored wheels/ directory; see deploy/README.md.
-platform = [
-    "agent-engine-sdk-langgraph",
-    "deepagents",
-    "langchain-mongodb-deepagents-vfs[bedrock]",
-    "langchain-openai>=0.3",
-    "langchain-anthropic>=0.3",
-]
 ui = ["streamlit>=1.32,<2"]
 test = ["pytest>=8,<9"]
 

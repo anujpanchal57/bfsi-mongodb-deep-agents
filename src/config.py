@@ -24,7 +24,7 @@ class Settings:
     runs_collection: str = "agent_runs"
     handoffs_collection: str = "agent_handoffs"
     packs_collection: str = "reviewer_packs"
-    aws_region: str = "ap-south-1"
+    aws_region: str = "us-east-1"
     s3_bucket: str = ""
     s3_prefix: str = "agent-engine-demo/"
     dataset_version: str = "v1"
@@ -33,10 +33,13 @@ class Settings:
     # deterministic (unit tests / offline only, non-production)
     embedding_provider: str = "bedrock"
     embedding_model: str = ""
-    llm_provider: str = "openai"
+    llm_provider: str = "bedrock"
     llm_model: str = ""
-    agent_engine_url: str = ""     # deployed agent or local `agentengine dev up`
+    agent_engine_url: str = ""     # local `agentengine dev up` ui URL, or platform base
     agent_engine_api_key: str = ""
+    # Deployed path only; falls back to .agentengine/state.json after `agentengine init`
+    agent_engine_project_id: str = ""
+    agent_engine_workspace_id: str = ""
     s3_backend: str = "s3"  # "local" = unit tests only
     local_s3_root: str = "data/generated/local_s3"
     log_level: str = "INFO"
@@ -68,6 +71,8 @@ _ENV_MAP = {
     "LLM_MODEL": "llm_model",
     "AGENT_ENGINE_URL": "agent_engine_url",
     "AGENT_ENGINE_API_KEY": "agent_engine_api_key",
+    "AGENT_ENGINE_PROJECT_ID": "agent_engine_project_id",
+    "AGENT_ENGINE_WORKSPACE_ID": "agent_engine_workspace_id",
     "S3_BACKEND": "s3_backend",
     "LOCAL_S3_ROOT": "local_s3_root",
     "LOG_LEVEL": "log_level",

@@ -29,6 +29,8 @@ src/tools/workspace_tools.py
 src/ui/__init__.py
 src/ui/app.py
 tests/test_agent_tools.py
+tests/test_llm.py
+tests/test_platform_client.py
 tests/test_platform_integration.py
 tests/test_reviewer_pack.py
 tests/test_seed.py

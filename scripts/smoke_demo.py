@@ -3,7 +3,10 @@
 invoke -> (platform-managed interrupt/resume via durable sessions) ->
 reviewer pack.
 
-Usage: AGENT_ENGINE_URL=http://localhost:8000 python scripts/smoke_demo.py
+Usage: AGENT_ENGINE_URL=http://localhost:3000 python scripts/smoke_demo.py
+(AGENT_ENGINE_URL = the ui URL printed by `agentengine dev up`; for the
+deployed agent, leave it unset and rely on .agentengine/state.json or
+AGENT_ENGINE_PROJECT_ID/AGENT_ENGINE_WORKSPACE_ID.)
 """
 import argparse
 import json

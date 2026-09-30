@@ -1,33 +1,52 @@
 name: accrual-variance-review
 entrypoint: src.demo_agent.main:app
 framework: langgraph
-description: Month-end accrual variance review with durable, evidence-driven
-  orchestration over an S3 + Atlas workspace. Human-in-the-loop BFSI demo.
+description: Month-end accrual variance review with durable, evidence-driven orchestration over an S3 + Atlas workspace. Human-in-the-loop BFSI demo.
 version: 0.1.0
-
+agent_card:
+  summary: Evidence-driven month-end accrual variance review; proposes, never approves.
+  capabilities:
+    - hybrid evidence search over an S3 + Atlas workspace
+    - durable workflow state and specialist handoffs
+    - reviewer pack generation with a hard human-decision boundary
 features:
-  deep_agent: true          # required for app.deep_agent()
-  durable_workflow: true    # OE-owned durable sessions
-  memory: false
-
+  deep_agent: true # required for app.deep_agent()
+  # Durability is implicit via app.checkpointer() (MongoDBSaver) — there is no
+  # durable_workflow flag in the current schema.
 sandboxes:
   agent:
     network:
       egress_mode: allow_list
       egress:
-        - fqdn: s3.ap-south-1.amazonaws.com   # S3 object I/O
-        - fqdn: api.openai.com                # LLM provider (adjust per LLM_PROVIDER)
-        - fqdn: bedrock-runtime.ap-south-1.amazonaws.com  # default embeddings (Titan v2)
+        - fqdn: s3.us-east-1.amazonaws.com
+          ports: [443]
+        - fqdn: '*.s3.us-east-1.amazonaws.com'
+          ports: [443]
+        - fqdn: s3.amazonaws.com
+          ports: [443]
+        - fqdn: '*.s3.amazonaws.com'
+          ports: [443]
+        - fqdn: openaipublic.blob.core.windows.net
+          ports: [443]
+        - fqdn: bedrock-runtime.us-east-1.amazonaws.com
+          ports: [443]
+        - fqdn: grove-gateway-prod.azure-api.net
+          ports: [443]
+    # MONGODB_URI is automatically available to every sandbox; do not declare it.
+    # Other secrets (LLM_API_KEY, S3_BUCKET, ...) are set via `agentengine secret set`.
     secrets: ["*"]
-    tools: ["*"]            # demo tools are all agent-side
+    tools: ["*"] # demo tools are all agent-side
   tool:
+    # SecureWrappedLLM executes LLM calls FROM the tool sandbox (invoke_llm),
+    # so the LLM provider endpoint must be allowed HERE, not (only) on agent.
+    network:
+      egress_mode: allow_list
+      egress:
+        - fqdn: bedrock-runtime.us-east-1.amazonaws.com
+          ports: [443]
+        - fqdn: grove-gateway-prod.azure-api.net
+          ports: [443]
     secrets: ["*"]
     tools: []
-
-required_secrets:
-  aer:
-    - MONGODB_URI
-    - LLM_API_KEY
-  tools:
-    invoke_llm:
-      - LLM_API_KEY
+# Atlas access for the deployed sandboxes is granted via `agentengine atlas link`
+# (or network.atlas_clusters), not egress FQDNs.
