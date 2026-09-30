@@ -82,6 +82,24 @@ def test_specialist_result_requires_expected_fields(platform_tools, ctx):
     out = json.loads(platform_tools["save_specialist_result"](
         ws, h["_id"], {"finding": []}))
     assert out["error"]["code"] == "invalid_result"
+    assert "received keys" in out["error"]["message"]
+
+
+def test_specialist_result_evidence_alias(platform_tools, ctx):
+    ws = ctx.settings.workspace_id
+    rid = json.loads(platform_tools["start_workflow_run"](ws, "s1", "review"))["_id"]
+    h = json.loads(platform_tools["create_specialist_handoff"](
+        ws, rid, "t", {"artifact_ids": [], "period": "p", "entity": "e"}))
+    res = json.loads(platform_tools["save_specialist_result"](
+        ws, h["_id"],
+        {"finding": [{"detail": "v"}],
+         "evidence": [{"artifact_id": "a1"}],  # alias for evidence_references
+         "unresolved_questions": [],
+         "recommended_next_step": "human review"}))
+    assert res["status"] == "completed"
+    stored = json.loads(platform_tools["get_handoff"](ws, h["_id"]))["result"]
+    assert stored["evidence_references"] == [{"artifact_id": "a1"}]
+    assert "evidence" not in stored
 
 
 def test_generate_reviewer_pack_via_tool(platform_tools, ctx):

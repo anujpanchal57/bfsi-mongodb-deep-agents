@@ -93,7 +93,9 @@ def register(app) -> None:
     def save_specialist_result(workspace_id: str, handoff_id: str,
                                result: dict) -> str:
         """Persist the specialist's result. Required keys: finding,
-        evidence_references, unresolved_questions, recommended_next_step."""
+        evidence_references, unresolved_questions, recommended_next_step.
+        Always pass ALL four keys; use an empty list/string when the
+        specialist reported 'evidence required' rather than omitting a key."""
         return _json(_save_result(_get_ctx(), workspace_id, handoff_id, result))
 
     @app.tool()

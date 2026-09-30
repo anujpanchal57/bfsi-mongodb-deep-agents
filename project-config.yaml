@@ -13,7 +13,7 @@ memory:
     provider: openai          # Bedrock is not a supported extraction provider
     model: gpt-4o-mini                  # provider default
     base_url: https://grove-gateway-prod.azure-api.net/grove-foundry-prod/openai/v1/
-    api_key_secret: ac6ee06e89484e28bda7c55ba4b0428c  # shared with the agent's fallback key
+    api_key_secret: LLM_API_KEY   # NAME of the env var in .env, never the key value
   background_extraction:
     snapshot:
       max_messages: 20

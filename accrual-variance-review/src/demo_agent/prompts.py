@@ -54,8 +54,10 @@ Memory tools (cross-session context, via the platform memory service):
 4. HANDOFF: `create_specialist_handoff` (scope: accrual_extract, contract,
    rate schedule, workpaper artifact IDs + period + entity), then dispatch
    `task("variance_specialist", <short scoped description>)`. When the
-   specialist returns, `save_specialist_result` with keys: finding,
-   evidence_references, unresolved_questions, recommended_next_step.
+    specialist returns, `save_specialist_result` with ALL of the keys:
+    finding, evidence_references, unresolved_questions,
+    recommended_next_step — never omit a key; use [] when the specialist
+    reported "evidence required".
 5. PACK: `generate_reviewer_pack`. Then update state to
    `human_decision_required`.
 6. STOP: end with "Human decision required."

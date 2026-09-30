@@ -47,11 +47,18 @@ def save_specialist_result(ctx: ToolContext, workspace_id: str,
     h = ctx.repo.get("handoffs", handoff_id)
     if not h or h.get("workspace_id") != workspace_id:
         raise ToolError("handoff_not_found", f"Handoff '{handoff_id}' not found.")
+    # Tolerate the model emitting the specialist's "EVIDENCE:" label as a key.
+    if "evidence_references" not in result and "evidence" in result:
+        result["evidence_references"] = result.pop("evidence")
     required = set(h.get("expected_output", []))
     missing = required - set(result)
     if missing:
-        raise ToolError("invalid_result",
-                        f"Specialist result missing fields: {sorted(missing)}")
+        raise ToolError(
+            "invalid_result",
+            f"Specialist result missing fields: {sorted(missing)} "
+            f"(received keys: {sorted(result)}). Pass ALL required keys; "
+            f"use an empty list for evidence_references when the specialist "
+            f"reported 'evidence required'.")
     ctx.repo.patch("handoffs", handoff_id,
                    {"status": "completed", "result": result,
                     "completed_at": utcnow()})
