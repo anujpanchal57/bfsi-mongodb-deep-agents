@@ -1,7 +1,7 @@
 [project]
 name = "accrual-variance-review"
 version = "0.1.0"
-description = "Long-running BFSI accrual-variance agent demo on Atlas Agent Engine + Deep Agents VFS + S3"
+description = "Long-running BFSI accrual-variance agent on Atlas Agent Engine + Deep Agents VFS + S3"
 requires-python = ">=3.11"
 dependencies = [
     # Platform contract: the Atlas Agent Engine requires both runner-shared and

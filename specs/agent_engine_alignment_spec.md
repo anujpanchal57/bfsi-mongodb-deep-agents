@@ -7,7 +7,7 @@
 > a custom `backend=` — the shipped SDK 0.11.6 still accepts it (see the new
 > spec §1 for the doc/SDK mismatch and fallback plan).
 
-Status: proposal. Supersedes the home-grown layers of the current demo where
+Status: proposal. Supersedes the home-grown layers of the current solution where
 noted. Source artifacts verified 2026-09-24:
 
 - `langchain-ai/langchain-mongodb` → `libs/langchain-mongodb-deepagents-vfs` (public)
@@ -30,7 +30,7 @@ agent loop, and runtime adapter. The platform already provides all four:
 | `src/agent_engine_adapter.py`, `src/agent_entrypoint.py` | `agent_engine_sdk_langgraph.App` entrypoint (`agent.yaml` `entrypoint:` contract) |
 | Custom session resume | `app.checkpointer()` (MongoDB checkpointing) + `features.durable_workflow: true` |
 
-Keep (they are the demo's business value, not platform plumbing):
+Keep (they are the solution's business value, not platform plumbing):
 `src/mockdata.py`, `src/seeding.py` (generation/upload/verify/validate),
 `src/models.py`, `src/storage/atlas_repository.py`, `src/storage/s3_repository.py`,
 `src/reviewer_pack.py`, the human-in-the-loop boundary, the Streamlit UI, and
@@ -135,7 +135,7 @@ def main() -> None:
   `backend=MongoFilesystemBackend(...)` directly. Two caveats from the SDK
   source: (1) the default `AgentEngineToolPodBackend` is the OE-audited I/O
   path — a custom backend bypasses that audit, so our own tool/access
-  logging must cover it (already required by the demo spec §14);
+  logging must cover it (already required by the solution spec §14);
   (2) `App.deep_agent()` raises unless `features.deep_agent: true` is set in
   `agent.yaml`.
 
@@ -149,7 +149,7 @@ logging, and structured errors as today):
 - `save_working_note`, `update_workflow_state` (business state; complements,
   not replaces, the checkpointer)
 - `create_specialist_handoff` / `save_specialist_result` / `get_handoff` —
-  keep as durable handoff *records* so the Handoff UI view and the demo's
+  keep as durable handoff *records* so the Handoff UI view and the solution's
   "durable handoff" story survive even though dispatch is via `task()`
 - `generate_reviewer_pack(workspace_id, run_id)` — unchanged logic
 
@@ -180,9 +180,9 @@ mapping `path → s3://bucket/key` in the pack builder.
 3. Validation adapts to the backend's chunk schema (`source_path`,
    `chunk_index`, `line_start`) instead of our `workspace_chunks` shape; the
    exact-match/semantic retrieval checks call `backend.grep()`.
-4. Reset must also clear the backend's chunks collection for the demo prefix
+4. Reset must also clear the backend's chunks collection for the configured S3 prefix
    (identify the collection name from the installed package; scope deletion
-   to `source_path` under the demo prefix) plus our business collections.
+   to `source_path` under the configured S3 prefix) plus our business collections.
 5. Embeddings use the package's **default provider — AWS Bedrock
    `amazon.titan-embed-text-v2:0` @ 1024 dims via the boto3 credential
    chain** (`EMBEDDING_PROVIDER=bedrock` is the package default; requires
@@ -196,7 +196,7 @@ mapping `path → s3://bucket/key` in the pack builder.
 Replace direct `AgentEngineRuntime` calls with the platform invoke path:
 locally `agentengine dev up` + its API/playground; deployed: the workspace
 invoke API (`input.payload` for structured requests — set
-`features.playground: false` if the demo UI stays Streamlit, or use the
+`features.playground: false` if the UI stays Streamlit, or use the
 provisioned playground instead and keep Streamlit as the reviewer-pack
 viewer only). Keep the four views and the human-decision banner unchanged.
 
@@ -207,7 +207,7 @@ name: accrual-variance-review
 entrypoint: demo_agent.main:app
 framework: langgraph
 description: Month-end accrual variance review with durable, evidence-driven
-  orchestration over an S3 + Atlas workspace. Human-in-the-loop BFSI demo.
+  orchestration over an S3 + Atlas workspace. Human-in-the-loop BFSI solution.
 version: 0.1.0
 
 features:
@@ -224,7 +224,7 @@ sandboxes:
         - fqdn: <LLM provider endpoint>     # e.g. api.anthropic.com
         - fqdn: <bedrock endpoint>          # default embeddings (Titan v2)
     secrets: ["*"]
-    tools: ["*"]            # demo tools are all agent-side
+    tools: ["*"]            # business tools are all agent-side
   tool:
     secrets: ["*"]
     tools: []
@@ -269,7 +269,7 @@ agentengine deploy
 
 ## 6. Durable-state mapping
 
-| Demo requirement | Platform mechanism |
+| Requirement | Platform mechanism |
 | --- | --- |
 | Session resume after break | `app.checkpointer()` + `features.durable_workflow: true`; same session/thread ID resumes |
 | Workflow step / next action visible in UI | Our `agent_runs` business state via `update_workflow_state` tool (kept) |
@@ -286,10 +286,10 @@ agentengine deploy
    Caveats: custom backends bypass the OE-audited Tool-Pod I/O path (cover
    with our own logging), and `features.deep_agent: true` is mandatory.
 3. **Search freshness**: VFS README documents watcher lag (polling default
-   10s) plus Atlas indexing lag — seed before the demo, don't write files
-   live on stage; consider `watcher="sqs"` only if the demo writes files.
+   10s) plus Atlas indexing lag — seed before the solution, don't write files
+   live on stage; consider `watcher="sqs"` only if the solution writes files.
 4. **Cluster tier + Bedrock access**: Vector + Full-Text Search need M10+;
-   the default Bedrock Titan embedding model must be enabled in the demo
+   the default Bedrock Titan embedding model must be enabled in the solution
    AWS account/region (`bedrock:InvokeModel` on the runtime role) — warm it
    during the pre-session checklist.
 5. **Python 3.11**: platform runner-base is CPython 3.11; local dev currently
@@ -320,7 +320,7 @@ agentengine deploy
 - AC-1 now means: `agentengine deploy` + platform invoke of
   `accrual-variance-review` runs the full flow (not a local adapter).
 - AC-3/AC-4: retrieval results come from `MongoFilesystemBackend.grep()`
-  with `$rankFusion`; the demo shows `GrepMatch` path/line provenance.
+  with `$rankFusion`; the solution shows `GrepMatch` path/line provenance.
 - AC-6: handoff demonstrated via deepagents `task()` dispatch **and** a
   durable `agent_handoffs` record.
 - All other ACs unchanged; AC-10 adds an `agentengine agent validate` gate.

@@ -1,7 +1,7 @@
 name: accrual-variance-review
 entrypoint: src.demo_agent.main:app
 framework: langgraph
-description: Month-end accrual variance review with durable, evidence-driven orchestration over an S3 + Atlas workspace. Human-in-the-loop BFSI demo.
+description: Month-end accrual variance review with durable, evidence-driven orchestration over an S3 + Atlas workspace. Human-in-the-loop BFSI solution.
 version: 0.1.0
 agent_card:
   summary: Evidence-driven month-end accrual variance review; proposes, never approves.
@@ -38,7 +38,7 @@ sandboxes:
     # MONGODB_URI is automatically available to every sandbox; do not declare it.
     # Other secrets (LLM_API_KEY, S3_BUCKET, ...) are set via `agentengine secret set`.
     secrets: ["*"]
-    tools: ["*"] # demo tools are all agent-side
+    tools: ["*"] # business tools are all agent-side
   tool:
     # SecureWrappedLLM executes LLM calls FROM the tool sandbox (invoke_llm),
     # so the LLM provider endpoint must be allowed HERE, not (only) on agent.

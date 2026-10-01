@@ -36,7 +36,7 @@
    Titan embed model (`amazon.titan-embed-text-v2:0`) **and** the chat model
    inference profile (`us.anthropic.claude-sonnet-4-5-20250929-v1:0`) plus the
    underlying model ARNs it routes to. **Pre-session checklist:** enable model
-   access for Claude Sonnet 4.5 in the demo account/region (manual console
+   access for Claude Sonnet 4.5 in the target account/region (manual console
    step) and confirm the exact `us.*` profile ID.
 7. Python SDK packages are on public PyPI (`agent-engine-sdk-langgraph`,
    `agent-engine-runner-shared`, `langchain-mongodb-deepagents-vfs`) —

@@ -27,7 +27,7 @@ Required change — pick one:
   `vfs_ls`) that the orchestrator prompt prefers over the built-in
   `filesystem_*` tools. Keeps `features.deep_agent: true`, subagents,
   checkpointer, and the audited LLM path. Cost: VFS I/O is no longer the
-  agent's filesystem; it is tool calls (which the demo narrative already
+  agent's filesystem; it is tool calls (which the walkthrough narrative already
   treats it as).
 - **(b) Drop `deep_agent`.** Build the graph manually
   (`create_deep_agent(backend=MongoFilesystemBackend(...))` from the
@@ -45,7 +45,7 @@ next build, or the agent fails to start.
 > bypass-the-audit warning in its docstring, and no rejection check exists in
 > the source. The docs page describes stricter behavior than the shipped
 > artifact. Decision: **keep `backend=MongoFilesystemBackend(...)`** (the
-> demo's core architecture) with the mismatch documented in
+> walkthrough's core architecture) with the mismatch documented in
 > `src/demo_agent/main.py`. If a future SDK version enforces the documented
 > rejection, apply option (a) above.
 
@@ -71,7 +71,7 @@ there is **no top-level `required_secrets`** field.
   egress policy since every workspace starts in `deny_all`.
 - Optional: add `agent_card.summary`/`capabilities` (UI display) and a
   `scaling` block (`replicas` default 4; pool-full errors when exhausted —
-  relevant for a booth demo with parallel sessions).
+  relevant for a booth walkthrough with parallel sessions).
 
 Gate: `agentengine agent validate --strict` must pass (exit 0).
 
@@ -230,4 +230,4 @@ not via IAM chain, `S3_BUCKET`, `S3_PREFIX`) lands in the real `.env`.
 4. §3 `app.run()`.
 5. §8 `platform_client.py` + smoke/UI re-point; test against `agentengine dev up`.
 6. §5–§7 flow docs + Makefile targets; run `init → atlas setup → secret set → deploy --auto`.
-7. §10–§12 housekeeping; re-run `make test` and the demo runbook.
+7. §10–§12 housekeeping; re-run `make test` and the presenter runbook.

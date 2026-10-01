@@ -1,14 +1,14 @@
-# Demo build specification: Long-running AI agents on MongoDB Agent Engine
+# Build specification: Long-running AI agents on MongoDB Agent Engine
 
 ## 1. Document purpose
 
-This is the implementation handoff for a conference demo at MongoDB.local Mumbai. Build a working demonstration of a long-running, evidence-driven AI workflow using MongoDB Agent Engine as the runtime, LangChain Deep Agents VFS as the agent workspace abstraction, MongoDB Atlas as the state and retrieval layer, and AWS S3 as the durable object store for source files.
+This is the implementation handoff for a conference session at MongoDB.local Mumbai. Build a working demonstration of a long-running, evidence-driven AI workflow using MongoDB Agent Engine as the runtime, LangChain Deep Agents VFS as the agent workspace abstraction, MongoDB Atlas as the state and retrieval layer, and AWS S3 as the durable object store for source files.
 
-The demo must make the platform value visible: the agent resumes work across sessions, retrieves targeted evidence from a growing document set, coordinates specialist work, and produces a reviewer-oriented output without taking regulated decisions away from humans.
+The solution must make the platform value visible: the agent resumes work across sessions, retrieves targeted evidence from a growing document set, coordinates specialist work, and produces a reviewer-oriented output without taking regulated decisions away from humans.
 
 ## 2. Source context
 
-The demo is based on the approved session abstract, “Building Durable, Searchable Workspaces for Long-Running AI Agents.” The abstract calls for a demonstration of:
+The solution is based on the approved session abstract, “Building Durable, Searchable Workspaces for Long-Running AI Agents.” The abstract calls for a demonstration of:
 
 * Persistent, searchable workspaces for LangChain Deep Agents
 * AWS S3 for file content and native file operations
@@ -23,7 +23,7 @@ Reference materials:
 * [LangChain Deep Agents VFS repository](https://github.com/langchain-ai/langchain-mongodb/tree/main/libs/langchain-mongodb-deepagents-vfs)
 * [MongoDB Atlas LangChain integration documentation](https://www.mongodb.com/docs/atlas/ai-integrations/langchain/#deepagents-virtual-file-system)
 
-## 3. Demo objective
+## 3. Objective
 
 Demonstrate this audience takeaway:
 
@@ -44,7 +44,7 @@ Demonstrate this audience takeaway:
 * Evidence-gap detection
 * Reviewer-pack generation
 * Human approval boundary
-* Thin demo UI plus a CLI smoke-test path
+* Thin UI plus a CLI smoke-test path
 * Seed data, automated tests, health checks, and a pre-recorded fallback path
 
 ### Out of scope
@@ -106,7 +106,7 @@ The presenter should be able to complete this flow in 5–7 minutes:
 
 ### Architecture rules
 
-* Agent Engine is the runtime of record for the deployed agent; do not run the demo only as a local script.
+* Agent Engine is the runtime of record for the deployed agent; do not run the solution only as a local script.
 * Keep the Agent Engine-specific bootstrap and deployment code isolated in one adapter module so SDK changes are localized.
 * S3 is the source-file/object layer. Atlas is the operational workspace, state, metadata, and retrieval layer.
 * The retrieval path must return source identifiers and evidence references with every material finding.
@@ -174,7 +174,7 @@ The ingestion pipeline must:
 
 The code must make clear which data is stored in S3 and which derived content is stored in Atlas.
 
-### FR-3a: Realistic mock-data seeding into Atlas
+### FR-3a: Realistic synthetic-data seeding into Atlas
 
 Provide a deterministic seed pipeline that creates a believable BFSI accrual-review workspace without using customer or production data. No human will provide the source files. The implementation agent owns generation of every source artifact, upload to S3, registration in Atlas, ingestion, indexing, and validation. The primary path must preserve the intended architecture:
 
@@ -185,7 +185,7 @@ Provide a deterministic seed pipeline that creates a believable BFSI accrual-rev
 5. Create the initial workflow state, evidence gap, and pending human decision.
 6. Validate expected document counts, relationships, and retrieval results.
 
-The seed pipeline must be idempotent and support a complete reset of only the demo namespace. It must never delete unrelated databases, collections, S3 prefixes, or Atlas data.
+The seed pipeline must be idempotent and support a complete reset of only the solution namespace. It must never delete unrelated databases, collections, S3 prefixes, or Atlas data.
 
 #### Seeded business scenario
 
@@ -209,7 +209,7 @@ The values must agree across the seeded artifacts so the agent can reconcile the
 
 The implementation must generate the actual source files; it must not assume that PDFs, CSVs, JSON files, workpapers, or approval records will be supplied separately. Generate them from a versioned manifest and templates, write them to an ephemeral local staging directory, and upload them to S3 before Atlas ingestion.
 
-Use these deterministic S3 object keys under the configured demo prefix:
+Use these deterministic S3 object keys under the configured configured S3 prefix:
 
 | S3 object key | Format | Purpose |
 | --- | --- | --- |
@@ -231,13 +231,13 @@ Generation requirements:
 * Generate internally consistent values across all files, including the INR 35,000 variance and the `pending_human_review` status.
 * Calculate and record SHA-256 hashes before upload; Atlas metadata and the manifest must contain the same hashes.
 * Upload and verify every expected S3 object before beginning ingestion.
-* Fail the seed command if an expected object is missing, has a mismatched hash, or is uploaded outside the configured demo prefix.
-* Do not silently use local files as the conference-demo source after upload; local staging is only an intermediate generation step.
+* Fail the seed command if an expected object is missing, has a mismatched hash, or is uploaded outside the configured configured S3 prefix.
+* Do not silently use local files as the live-session source after upload; local staging is only an intermediate generation step.
 * Make generated files safe to delete and recreate using the reset command.
 
 The README must state clearly that a clean checkout plus credentials is sufficient to generate the complete S3 dataset; no manually prepared source artifacts are required.
 
-#### Required mock artifacts
+#### Required synthetic artifacts
 
 Generate at least these artifacts with cross-referenced IDs and provenance:
 
@@ -420,7 +420,7 @@ The UI and agent output must visibly label these actions as human-controlled:
 * Final reporting
 * Regulatory closure or communication
 
-The demo must never expose a tool that posts a journal, closes a finding, or approves a control as an agent action.
+The solution must never expose a tool that posts a journal, closes a finding, or approves a control as an agent action.
 
 ## 8. Suggested Atlas data model
 
@@ -540,7 +540,7 @@ Build requirements:
 * Provide a single Agent Engine entrypoint for the orchestrator.
 * Use a stable request contract containing `workspace_id`, `session_id`, `run_id` if supplied, and `user_message`.
 * Keep durable state in Atlas; treat the Agent Engine process as restartable.
-* Expose health/readiness behavior suitable for a live demo.
+* Expose health/readiness behavior suitable for a live session.
 * Capture run IDs and correlation IDs in every log line.
 * Provide a local development mode that invokes the same agent entrypoint without bypassing the production adapter.
 * Keep provider-specific model configuration in environment variables.
@@ -560,7 +560,7 @@ class AgentEngineRuntime:
 
 Do not invent an Agent Engine API. If the current SDK uses a different entrypoint or deployment model, adapt this interface to the supported model and document the mapping.
 
-## 11. Demo interface
+## 11. Interface
 
 Build a thin Streamlit or equivalent UI with these views:
 
@@ -684,9 +684,9 @@ Requirements:
 * Use secret-manager or Agent Engine secret configuration for deployed credentials.
 * Never commit `.env`, private keys, real URIs, or customer data.
 * Fail fast with a clear message when required variables are missing.
-* Provide a mock/local mode only for unit tests; the conference demo path must use the real Atlas and S3 integrations.
+* Provide a local/offline mode only for unit tests; the conference session path must use the real Atlas and S3 integrations.
 
-## 14. Observability and demo diagnostics
+## 14. Observability and diagnostics
 
 Log structured events for:
 
@@ -712,7 +712,7 @@ Add a diagnostic command that verifies:
 
 ## 15. Acceptance criteria
 
-The demo is complete when all criteria pass:
+The solution is complete when all criteria pass:
 
 ### AC-1: Real Agent Engine path
 
@@ -744,7 +744,7 @@ The system clearly separates agent-generated findings from human decisions and e
 
 ### AC-8: Reproducible seed
 
-A single documented command resets only the demo namespace in Atlas and the configured S3 prefix, reseeds the versioned mock dataset, validates indexes, and reports the expected artifact, chunk, and evidence-gap counts.
+A single documented command resets only the solution namespace in Atlas and the configured S3 prefix, reseeds the versioned synthetic dataset, validates indexes, and reports the expected artifact, chunk, and evidence-gap counts.
 
 ### AC-9: Seed-data realism and consistency
 
@@ -760,7 +760,7 @@ From a clean checkout, the documented seed command generates every required sour
 
 ### AC-12: Failure recovery
 
-The README includes a backup demo path and troubleshooting steps for unavailable Agent Engine, S3, Atlas indexes, model provider, or network access.
+The README includes a backup walkthrough path and troubleshooting steps for unavailable Agent Engine, S3, Atlas indexes, model provider, or network access.
 
 ## 16. Presenter runbook
 
@@ -789,15 +789,15 @@ The README includes a backup demo path and troubleshooting steps for unavailable
 ### Recovery shortcuts
 
 * If Agent Engine is unavailable: run the local adapter against the same Atlas and S3 data, while clearly labeling it as local fallback.
-* If search indexes are not ready: use the precomputed seeded results only as a backup, never as the primary demo path.
+* If search indexes are not ready: use the precomputed seeded results only as a backup, never as the primary walkthrough path.
 * If model latency is high: use a cached transcript for the narrative and show the live retrieval/state transitions.
-* If the UI fails: run the CLI smoke-demo and show the structured reviewer pack.
+* If the UI fails: run the CLI smoke test and show the structured reviewer pack.
 
 ## 17. Implementation order
 
 1. Validate the current MongoDB Agent Engine runtime and deployment contract.
 2. Create the repository skeleton and configuration validation.
-3. Define the versioned mock-data manifest and synthetic BFSI artifacts.
+3. Define the versioned synthetic-data manifest and synthetic BFSI artifacts.
 4. Implement the Atlas collections, indexes, and seed/reset/validation commands.
 5. Implement S3 upload and ingestion with provenance-preserving chunking.
 6. Implement workspace and state repositories.
@@ -814,14 +814,14 @@ The README includes a backup demo path and troubleshooting steps for unavailable
 The implementation is ready for handoff and rehearsal when:
 
 * The real Agent Engine deployment executes the end-to-end flow.
-* The demo uses real Atlas and S3 integrations.
+* The solution uses real Atlas and S3 integrations.
 * A session break does not lose the workflow state.
 * Retrieval results are targeted, source-linked, and reproducible.
 * The specialist handoff is durable and scoped.
 * The reviewer pack exposes evidence gaps and human decision points.
 * No regulated decision is made autonomously.
-* A clean-environment setup, test, deploy, seed, reset, and demo command are documented.
-* The mock dataset is versioned, deterministic, synthetic, cross-document consistent, and seeded through the S3-to-Atlas path.
+* A clean-environment setup, test, deploy, seed, reset, and run command are documented.
+* The synthetic dataset is versioned, deterministic, synthetic, cross-document consistent, and seeded through the S3-to-Atlas path.
 * No human-provided source artifacts are required; the implementation generates and verifies the complete S3 source dataset.
 * Seed validation confirms expected workspaces, artifacts, chunks, indexes, retrieval targets, and evidence gaps.
 * The presenter can complete the flow within seven minutes and recover using the fallback path.

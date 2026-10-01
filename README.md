@@ -1,16 +1,16 @@
-# Long-Running AI Agents on Atlas Agent Engine — BFSI Accrual Variance Demo
+# Long-Running AI Agents on Atlas Agent Engine — BFSI Accrual Variance Review
 
-Conference demo (MongoDB.local Mumbai): a durable, evidence-driven agent
-workflow for month-end accrual variance review.
+A durable, evidence-driven agent workflow for month-end accrual variance
+review.
 
 - **Atlas Agent Engine** runs the agent (`accrual-variance-review/agent.yaml`
   → `src.demo_agent.main:app`; two-level layout with `project-config.yaml`
   at the repo root for the memory service;
   DeepAgents orchestrator + variance-analysis subagent via `task()` dispatch;
-  durable sessions via the platform MongoDB checkpointer).
+  durable sessions via the platform MongoDB checkpointer). Know more about MongoDB Atlas Agent Engine - https://www.mongodb.com/products/platform/atlas-agent-engine
 - **LangChain Deep Agents VFS** (`langchain-mongodb-deepagents-vfs`) is the
   workspace backend: `grep`/`glob`/`ls` run as Atlas `$rankFusion` hybrid
-  search; `read`/`write` hit S3, the source of truth for files.
+  search; `read`/`write` hit S3, the source of truth for files. Know more about this package - https://github.com/langchain-ai/langchain-mongodb/tree/main/libs/langchain-mongodb-deepagents-vfs
 - **AWS S3** retains raw source files; **MongoDB Atlas** stores searchable
   chunks/embeddings (VFS-owned) and business state (workspaces, runs,
   handoffs, reviewer packs — ours).
@@ -30,6 +30,54 @@ workflow for month-end accrual variance review.
 A clean checkout plus credentials generates the complete S3 dataset — no
 manually prepared source artifacts are required.
 
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph CLIENT[" "]
+        UI["Streamlit UI /<br/>Playground / CLI"]
+    end
+
+    subgraph AE["Atlas Agent Engine"]
+        OE["Orchestration Engine<br/>(audit, policy, sessions)"]
+        subgraph AS["Agent Sandbox (egress-allowlisted)"]
+            DA["Deep Agent<br/>Orchestrator"]
+            SA["Variance Specialist<br/>subagent"]
+            BT["Business tools<br/>(@app.tool)"]
+            DA -->|"task() dispatch"| SA
+            DA --> BT
+        end
+        subgraph TS["Tool Sandbox"]
+            IL["invoke_llm<br/>(audited LLM path)"]
+        end
+        DA --> IL
+        OE --> AS
+    end
+
+    subgraph ATLAS["MongoDB Atlas"]
+        VFS[("VFS chunks + embeddings<br/>$rankFusion hybrid search")]
+        BIZ[("Business state:<br/>workspaces · runs · handoffs · packs")]
+        CKPT[("Session checkpoints")]
+    end
+
+    subgraph AWS["AWS"]
+        S3[("S3 — source files<br/>(source of truth)")]
+        BR["Bedrock<br/>Claude Sonnet 4.5 (LLM)<br/>Titan v2 (embeddings)"]
+    end
+
+    HUMAN["Human reviewer<br/>(approves / corrects / closes)"]
+
+    UI --> OE
+    DA <-->|"grep / glob / ls"| VFS
+    DA <-->|"read / write"| S3
+    VFS -.->|"sync + chunk"| S3
+    VFS -.->|"embed"| BR
+    IL --> BR
+    BT --> BIZ
+    OE --> CKPT
+    BT -->|"reviewer pack:<br/>propose only"| HUMAN
+```
+
 ## Quick start
 
 ```bash
@@ -41,9 +89,9 @@ make seed                              # generate -> upload/verify S3 -> registe
                                        # -> VFS backend sync -> validate
 make validate                          # re-check workspace + retrieval targets
 make diagnose                          # platform/Atlas/collections/S3/seed/search
-make ui                                # Streamlit demo UI (needs AGENT_ENGINE_URL)
+make ui                                # Streamlit UI (needs AGENT_ENGINE_URL)
 make smoke                             # CLI smoke against the running agent
-make reset                             # delete ONLY the demo namespace
+make reset                             # delete ONLY the solution's namespace
 
 # platform lifecycle (agentengine CLI — download page, then `agentengine auth login`)
 agentengine init                       # register workspace (.agentengine/state.json)
@@ -56,10 +104,11 @@ make deploy-auto                       # build + deploy in one step
 ```
 
 **Reset boundary:** `reset` deletes only business docs whose `workspace_id`
-matches the demo workspace, VFS chunks whose `source_path` is under the demo
-`S3_PREFIX`, and S3 objects under that prefix. Nothing else is touched.
+matches the seeded workspace, VFS chunks whose `source_path` is under the
+configured `S3_PREFIX`, and S3 objects under that prefix. Nothing else is
+touched.
 
-## Demo flow (5–7 min)
+## Walkthrough
 
 1. Workspace tab: artifacts, statuses, open evidence gap.
 2. Agent tab: "Review the open accrual variance." The orchestrator greps
@@ -76,7 +125,8 @@ matches the demo workspace, VFS chunks whose `source_path` is under the demo
 6. Reviewer pack tab: evidence table, gaps, assumptions, and the HUMAN
    DECISION REQUIRED banner. There is no approve/post/close button.
 
-CLI equivalent: `make smoke`. Presenter prompt runbook: `docs/demo_prompts.md`.
+CLI equivalent: `make smoke`. Presenter prompt runbook:
+`docs/presenter_runbook.md`.
 
 ## Seeded scenario (all synthetic)
 
@@ -101,7 +151,7 @@ offline tests.
 | Agent Engine unavailable | `agentengine dev up` locally against the same Atlas + S3 (labeled local fallback) |
 | Search not ready | Re-run `make seed` (backend sync is idempotent via ETags); check `make diagnose` output |
 | Bedrock throttled/unavailable | LLM: switch to `LLM_PROVIDER=openai` + `LLM_API_KEY` (and uncomment the `api.openai.com` egress line if deployed). Embeddings: backend falls back to full-text-only grep; narrate as such |
-| Model latency high | Demo narrative continues from durable state + reviewer pack |
+| Model latency high | The narrative continues from durable state + reviewer pack |
 | UI fails | `make smoke` prints the full flow incl. the reviewer pack |
 | No external services at all | `make test` exercises generation, hashing, consistency, reset isolation, tools, and the reviewer pack offline |
 

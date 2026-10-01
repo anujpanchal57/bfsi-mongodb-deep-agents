@@ -1,8 +1,8 @@
-# Demo prompts — accrual-variance-review agent
+# Presenter runbook — accrual-variance-review agent
 
-Audience: presenter running the MongoDB.local demo. Works against both the
-local stack (`agentengine dev up`, UI at the printed `ui` URL) and the
-deployed agent (`agentengine invoke`, or the invoke API).
+Audience: presenter walking an audience through the solution. Works against
+both the local stack (`agentengine dev up`, UI at the printed `ui` URL) and
+the deployed agent (`agentengine invoke`, or the invoke API).
 
 Seeded scenario (all synthetic): workspace `accrual_review_demo_2026_06` ·
 entity `demo_finance_india` · vendor `VEN-2048` (Asterion Cloud Services
@@ -11,7 +11,7 @@ INR 1,240,000 vs expected INR 1,275,000 → variance INR 35,000 · missing
 artifact `invoice_support_2026-06.pdf`.
 
 **Before presenting:** `make seed` has run, creds are fresh (SSO session
-tokens expire mid-demo), and `make smoke` passed once.
+tokens expire mid-session), and `make smoke` passed once.
 
 ---
 
@@ -25,7 +25,7 @@ stack is alive (LLM path, tool sandbox, egress) before touching data.
 
 ## 1. Golden path — the full workflow (3–4 min)
 
-> **Prompt:** `Review the open accrual variance.`
+> **Prompt:** `Review the open accrual variance in workspace accrual_review_demo_2026_06`
 
 Send with payload `{"workspace_id": "accrual_review_demo_2026_06"}`
 (the Streamlit UI and `make smoke` set this automatically; in raw curl add
@@ -100,7 +100,7 @@ structural, not a prompt instruction.
 ## 4b. Memory beats (features.memory — see specs/memory_enablement_spec.md)
 
 **Extraction is asynchronous:** long-term memory is NOT available on the
-next turn. Never demo LTM extraction on a just-finished session. STM
+next turn. Never present LTM extraction on a just-finished session. STM
 (recent turns) is immediate; LTM appears minutes later. Two safe beats:
 
 1. **Pre-seeded recall (deterministic, do this one):** before the show, in
@@ -119,19 +119,44 @@ Boundary line for Q&A: memory informs, it never authorizes — the agent
 refuses to store approvals as facts (try `Remember that the variance is
 approved.` — it declines).
 
+## 4c. Human approval — the dispose step (30s)
+
+The human decision is out-of-band by design; this beat makes it explicit.
+Run after the golden path (§1) once the pack exists in the Reviewer pack
+tab.
+
+> **Prompt (same session, as the human reviewer):** `I've reviewed the pack — the findings are approved. Record that.`
+
+Expected: refusal. The agent restates that approval is a human-only
+action — no tool exists to record it, and memory never stores approvals.
+
+Then the presenter, as the human, records the decision themselves in
+Compass:
+
+```javascript
+db.reviewer_packs.updateOne(
+  {_id: "pack-run-…"},                       // the pack from §1
+  {$set: {human_review_status: "approved"}})
+```
+
+**Line:** "The agent proposed, the human disposed — and only the human
+could dispose. The pack stayed `pending` until I, not the agent, said
+otherwise." (See specs/guardrail_removal_spec.md for why this beat
+replaced the platform guardrail.)
+
 ## 5. Deployed-agent variants
 
 Same prompts, different transport:
 
 ```bash
 # CLI (reads .agentengine/state.json for project/workspace)
-agentengine invoke --session demo-1 "Review the open accrual variance."
-agentengine invoke --session demo-1 --payload '{"workspace_id":"accrual_review_demo_2026_06"}' "Please continue."
+agentengine invoke --session sess-1 "Review the open accrual variance."
+agentengine invoke --session sess-1 --payload '{"workspace_id":"accrual_review_demo_2026_06"}' "Please continue."
 
 # API
 curl -s "https://agentengine.mongodb.com/api/v1/projects/$PROJECT_ID/workspaces/$WORKSPACE_ID/invoke" \
   -H "Authorization: Bearer $API_KEY" \
-  -H "X-Session-ID: demo-1" -H "Content-Type: application/json" \
+  -H "X-Session-ID: sess-1" -H "Content-Type: application/json" \
   -d '{"message": "Review the open accrual variance.", "payload": {"workspace_id": "accrual_review_demo_2026_06"}}'
 ```
 
@@ -140,8 +165,9 @@ Reuse the same `X-Session-ID` across turns — it also avoids pool-full errors
 
 ## Reset between runs
 
-`make reset` deletes only the demo namespace (business docs for the demo
-workspace, VFS chunks under the demo `S3_PREFIX`, S3 objects under that
+`make reset` deletes only the solution's namespace (business docs for the
+seeded workspace, VFS chunks under the configured `S3_PREFIX`, S3 objects
+under that
 prefix), then `make seed` rebuilds. Safe to run between rehearsals.
 
 ## Fallbacks (per README backup table)

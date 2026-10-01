@@ -1,10 +1,10 @@
-# Spec: Bedrock-provided LLMs for the demo agent
+# Spec: Bedrock-provided LLMs for the solution agent
 
 Status: **implemented 2026-09-29; live-verified 2026-09-30** — agent answers
 end-to-end via Bedrock Converse under `agentengine dev up` with egress
-enforced (§5 risk 3 cleared). Full demo-flow smoke (`make smoke`) still
+enforced (§5 risk 3 cleared). Full walkthrough smoke (`make smoke`) still
 pending seed. Scope: swap the agent's chat LLM from OpenAI/Anthropic
-direct APIs to AWS Bedrock, in the demo region (`us-east-1`). Verified
+direct APIs to AWS Bedrock, in the target region (`us-east-1`). Verified
 2026-09-29: `langchain-aws` 1.7.9 is already installed/locked (pulled by
 `langchain-mongodb-deepagents-vfs[bedrock]`); `ChatBedrockConverse` exposes
 `model_id`, `region_name`, `temperature`, `max_tokens`, and explicit
@@ -13,10 +13,10 @@ credential fields.
 ## 1. Why
 
 - **One credential chain for everything AWS:** embeddings already use Bedrock
-  Titan v2 via the boto3 chain. Moving the chat LLM to Bedrock means the demo
+  Titan v2 via the boto3 chain. Moving the chat LLM to Bedrock means the solution
   needs no third-party LLM API key at all — one IAM principal, one audit
   trail, one egress endpoint.
-- **BFSI narrative:** data stays in-region (`us-east-1`) inside the demo's
+- **BFSI narrative:** data stays in-region (`us-east-1`) inside the solution's
   own AWS account; no prompt content leaves for a third-party SaaS endpoint.
   Stronger story for the room than "we put an OpenAI key in a secret store".
 - **Fewer secrets:** `LLM_API_KEY` disappears from the required set.
@@ -67,7 +67,7 @@ if provider == "bedrock":
 - Default model: Claude Sonnet 4.5 via the **cross-region inference
   profile** (`us.` prefix — required for Claude Sonnet 4.5; on-demand direct
   model IDs for Anthropic models are not invocable there). Confirm the exact
-  profile ID in the demo account and pin it in `.env.example`.
+  profile ID in the arget account and pin it in `.env.example`.
   Fallback choice if Anthropic access isn't granted in the account:
   `us.amazon.nova-pro-v1:0`.
 
@@ -98,12 +98,12 @@ if provider == "bedrock":
 
 ### 3.5 IAM
 
-One policy covers the whole demo runtime (LLM + embeddings):
+One policy covers the whole solution runtime (LLM + embeddings):
 
 - `bedrock:InvokeModel` / `bedrock:InvokeModelWithResponseStream` on the
   inference-profile ARN **and** the underlying model ARNs it routes to
   (cross-region profiles require both), plus the existing Titan embed ARN.
-- Enable model access for Claude Sonnet 4.5 (or Nova Pro) in the demo
+- Enable model access for Claude Sonnet 4.5 (or Nova Pro) in the solution
   account/region beforehand — this is a manual console step and the most
   likely day-of surprise. Add it to the pre-session checklist in
   `deploy/README.md`.
@@ -138,22 +138,22 @@ One policy covers the whole demo runtime (LLM + embeddings):
 - Live verification: `agentengine dev up` + `make smoke` with
   `LLM_PROVIDER=bedrock`; confirm tool-calling works end-to-end through
   `SecureWrappedLLM` (Converse API streaming is the one integration risk
-  worth a pre-demo run).
+  worth a pre-presentation run).
 
 ## 6. Risks / open questions
 
 1. **Inference-profile ID drift** — exact `us.*` IDs must be confirmed in
-   the demo account; treat `LLM_MODEL` as required config, not a constant.
+   the arget account; treat `LLM_MODEL` as required config, not a constant.
 2. **Model access not enabled** in the account/region → runtime
    `AccessDeniedException`; mitigate via the pre-session checklist (§3.5).
 3. **SecureWrappedLLM × Converse streaming** — untested combination;
-   §5 live check gates the demo on it.
-4. **Static AWS keys in platform secrets** — acceptable for a demo;
+   §5 live check gates the solution on it.
+4. **Static AWS keys in platform secrets** — acceptable here;
    least-privilege IAM user, rotate after the event.
 
 ## 7. Acceptance criteria
 
-- `LLM_PROVIDER=bedrock` + AWS creds (no `LLM_API_KEY`) runs the full demo
+- `LLM_PROVIDER=bedrock` + AWS creds (no `LLM_API_KEY`) runs the full solution
   flow locally under `agentengine dev up` and deployed.
 - `agent.yaml` egress allowlist contains exactly `s3.us-east-1.amazonaws.com`
   and `bedrock-runtime.us-east-1.amazonaws.com` (OpenAI entry removed or

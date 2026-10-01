@@ -1,6 +1,6 @@
 # The Use Case: Month-End Accrual Variance Review
 
-A complete walkthrough of the business problem this demo solves, the
+A complete walkthrough of the business problem this solution addresses, the
 vocabulary it uses, the seeded scenario, and how the agent investigates —
 written for someone who has never seen an accrual or this codebase before.
 
@@ -39,7 +39,7 @@ material variance must be **investigated, evidenced, and dispositioned by a
 human**: either the booking is corrected, or the variance is explained and
 approved.
 
-### The pain this demo addresses
+### The pain this solution addresses
 
 The investigation is tedious detective work: dig up the contract, find the
 rate schedule, pull this month's and last month's accrual extracts, check
@@ -53,13 +53,13 @@ do well — **as long as it can be trusted**. Trust here means three things:
 3. **The decision stays with a human** — the agent proposes; it can never
    approve, post, or close.
 
-Those three properties are the entire design of this demo.
+Those three properties are the entire design of this solution.
 
 ---
 
 ## 2. Glossary — the artifacts and terms used
 
-| Term | What it is in this demo |
+| Term | What it is in this solution |
 | --- | --- |
 | **Accrual** | Month-end estimate of an expense incurred but not yet invoiced |
 | **Variance** | Booked accrual minus expected accrual; the thing being investigated |
@@ -204,11 +204,11 @@ it, it's only 35,000" — it will refuse and restate the boundary.
 | "The work survives a session break" | Platform **MongoDB checkpointer** (session state) + our durable business records (`agent_runs`, `agent_handoffs`, `reviewer_packs`) |
 | "The agent can only reach what we allow" | Agent Engine **egress allowlist** — S3, Bedrock, and the tiktoken CDN only |
 | Audited LLM/tool calls | SDK wrappers (`SecureWrappedLLM`, secure tool wrappers) routing through the Orchestration Engine |
-| The human decision | Out-of-band by design: the reviewer pack in the UI; the platform's HITL interrupt/resume exists but this demo keeps the boundary tool-structural |
+| The human decision | Out-of-band by design: the reviewer pack in the UI; the platform's HITL interrupt/resume exists but this solution keeps the boundary tool-structural |
 
 ---
 
-## 6. Why this pattern matters beyond the demo
+## 6. Why this pattern matters beyond this use case
 
 Accrual review is one instance of a general BFSI shape: **long-running,
 evidence-driven investigations over a document corpus, where the machine
@@ -218,7 +218,7 @@ specialist delegation, a pack for a human decision — fits KYC document
 review, invoice reconciliation, audit evidence collection, regulatory
 change-impact analysis, and similar workflows.
 
-The demo's point is not that an LLM can do arithmetic on two CSVs. It is
+The point is not that an LLM can do arithmetic on two CSVs. It is
 that the **plumbing** (durability, retrieval quality, auditability,
 sandboxing, human boundary) is what makes an agent deployable in a
 regulated environment — and that is what the platform provides.
@@ -227,8 +227,8 @@ regulated environment — and that is what the platform provides.
 
 ## 7. Where to go next
 
-- Run it: `README.md` (quick start) → `docs/demo_prompts.md` (presenter
-  runbook with the exact prompts and what to show)
+- Run it: `README.md` (quick start) → `docs/presenter_runbook.md` (the
+  exact prompts and what to show)
 - Deploy it: `deploy/README.md`
-- Design decisions: `specs/mongodb_agent_engine_demo_spec.md`,
+- Design decisions: `specs/mongodb_agent_engine_spec.md`,
   `specs/agent_engine_latest_docs_spec.md`, `specs/bedrock_llm_spec.md`

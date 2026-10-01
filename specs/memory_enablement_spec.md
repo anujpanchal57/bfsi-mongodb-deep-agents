@@ -10,7 +10,7 @@ search and returns empty); a real Anthropic `LLM_API_KEY` for extraction;
 and the deployed path (`memory configure` → `deploy` → `memory status`).
 Two implementation notes beyond the spec: (1) memory calls require a
 `user_id` on the invoke request (body field) — the memory beats in
-docs/demo_prompts.md need it; (2) `remember_fact` hard-refuses
+docs/presenter_runbook.md need it; (2) `remember_fact` hard-refuses
 approval-shaped content (regex guard), not just a prompt instruction.
 
 Based on the public docs (Add Memory to Your Agent, Agent Memory, Memory
@@ -18,9 +18,9 @@ Extraction), fetched 2026-09-30. Memory is configured at the
 **project** level (`project-config.yaml`) and enabled per agent via
 `features.memory: true` in `agent.yaml`.
 
-## 0. Why memory for this demo — and what it must not do
+## 0. Why memory for this solution — and what it must not do
 
-The demo already has **session durability** (platform checkpointer +
+The solution already has **session durability** (platform checkpointer +
 `agent_runs`). Memory adds the missing layer: **cross-session,
 cross-period knowledge**. The narrative upgrade:
 
@@ -114,7 +114,7 @@ memory:
       # procedural: opt in later if the "learned workflow" beat is wanted
 ```
 
-### 2.3 The extraction-LLM tension (call this out in the demo honestly)
+### 2.3 The extraction-LLM tension (call this out in the solution honestly)
 
 Memory's background extraction LLM supports only
 `openai | anthropic | gemini | cerebras` — **not Bedrock/boto3**. Our agent
@@ -202,7 +202,7 @@ Orchestrator gains two lines:
 
 Deployed agents get turns recorded automatically (STM) — no code. The
 background pipeline snapshots and extracts into long-term memory
-asynchronously (§5 demo-timing caveat).
+asynchronously (§5 walkthrough-timing caveat).
 
 ## 4. Optional: seed the glossary as taxonomic memory
 
@@ -212,7 +212,7 @@ each term with `save_taxonomic(domain="accrual_accounting", ...)`. Value:
 the agent answers "what is an accrual variance?" consistently, live.
 Optional — defer if time is short.
 
-## 5. Demo-flow changes (`docs/demo_prompts.md` additions)
+## 5. Walkthrough changes (`docs/presenter_runbook.md` additions)
 
 **Extraction is asynchronous** — extracted memories appear "shortly after"
 a session, not on the next turn. Plan beats accordingly; STM is immediate,
@@ -238,7 +238,7 @@ LTM is not. Two safe sequences:
    documented symptom of an under-tiered cluster.
 4. **Preview instability** — `memory configure` CLI is marked for removal;
    memory config may move to the UI mid-prep. Re-check docs at rehearsal.
-5. **Extraction latency (§5)** — never demo LTM extraction live on a
+5. **Extraction latency (§5)** — never present LTM extraction live on a
    just-finished session.
 6. **Boundary drift** — a retrieved "fact" could look like a decision.
    Mitigated by the prompt line (§3.2) and by §4.1's refusal to store
@@ -255,7 +255,7 @@ LTM is not. Two safe sequences:
   is recalled in session B; a past review is recalled episodically.
 - The reviewer pack flow and the human-decision boundary are unchanged
   (offline tests + one full smoke).
-- `docs/demo_prompts.md` gains the §5 memory beats; README bullet added
+- `docs/presenter_runbook.md` gains the §5 memory beats; README bullet added
   ("Memory: cross-session episodic/semantic/taxonomic recall via the
   platform memory service").
 
@@ -267,4 +267,4 @@ LTM is not. Two safe sequences:
 3. Memory tools + prompt lines (§3); offline test with a stubbed
    `app.memory`.
 4. Deploy path: `memory configure` → `deploy` → `memory status`.
-5. Demo beats + docs; optional glossary seeding (§4).
+5. Walkthrough beats + docs; optional glossary seeding (§4).

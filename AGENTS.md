@@ -1,6 +1,6 @@
 # AGENTS.md — atlas-vfs-deepagents-bfsi
 
-BFSI conference demo: durable, evidence-driven month-end accrual variance
+BFSI reference solution: durable, evidence-driven month-end accrual variance
 review on MongoDB Atlas Agent Engine. Human-in-the-loop by design: the agent
 proposes, never approves/posts/closes — no such tool exists (structural
 boundary, keep it that way).
@@ -14,7 +14,7 @@ boundary, keep it that way).
     `pyproject.toml` + `uv.lock` (commit the lock; `uv lock` after dep
     changes, then `agentengine dev restart`), `.env` (gitignored, real
     secrets), `src/`, `tests/`, `scripts/`, `data/`.
-- `docs/` — usecase.md (explainer), demo_prompts.md (presenter runbook),
+- `docs/` — usecase.md (explainer), presenter_runbook.md (presenter runbook),
   slides.md (slide content + mermaid architecture).
 - `specs/` — design specs incl. memory_enablement_spec.md (memory design +
   pending items) and feedback_agentengine_cli_bedrock_preflight.md.
@@ -46,7 +46,7 @@ boundary, keep it that way).
 ## Commands
 
 - `make test` (offline; integration tests skip unless AGENT_ENGINE_URL set),
-  `make seed` / `make reset` (reset deletes ONLY the demo namespace),
+  `make seed` / `make reset` (reset deletes ONLY the solution namespace),
   `make dev` (`agentengine dev up`), `make validate-agent`,
   `make deploy-auto`, `make memory-configure|apply|status`, `make smoke`.
 - `agentengine agent validate --strict` must pass after editing agent.yaml.
@@ -68,6 +68,18 @@ boundary, keep it that way).
 - `project-config.yaml` `extraction_llm.api_key_secret` takes the NAME of an
   env var (`LLM_API_KEY`), never the key value — a literal key fails
   ProjectConfig validation and crash-loops memory-server on `dev up`.
+- `agentengine dev logs` FOLLOWS (blocks forever) — use
+  `docker logs --tail N <container>` on the unhealthy one instead.
+- OE unhealthy with "Failed to initialize MongoDB / ReplicaSetNoPrimary"
+  right after `dev restart` is usually transient container-network slowness
+  (host AND fresh-container TCP to all shards can test fine); `dev stop &&
+  dev up` clears it. If memory-server then fails to start, read its logs for
+  ProjectConfig validation errors before blaming the network.
+- Tools that validate LLM-constructed dicts must return SELF-CORRECTIVE
+  errors (list the received keys, say "pass [] when empty") — a bare
+  "missing fields" error makes the model retry ~10x and the run 500s.
+  `save_specialist_result` now also accepts the `evidence` alias for
+  `evidence_references`.
 - `.env.example` is placeholders ONLY — real credentials were once committed
   there and pushed to GitHub; they were rotated and the file masked. Never
   put real values in it again.
